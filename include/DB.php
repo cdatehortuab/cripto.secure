@@ -29,9 +29,7 @@ class DB {
 	private function escape_string(&$data) {
 		if(is_object($data)) {
 			foreach ($data->jsonSerialize() as $key => $attribute) {
-				if (!empty($data->$key)) {
-					$data->$key = mysqli_real_escape_string($this->cn, $data->$key);
-				}
+				$data->$key = mysqli_real_escape_string($this->cn, $data->$key);
 			}
 		} else if(is_array($data)) {
 			foreach ($data as $key => $value) {

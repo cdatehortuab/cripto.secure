@@ -38,8 +38,8 @@
 				<ul class="nav navbar-nav navbar-right">
 					<li>
 						<p class="navbar-text">
-						<strong><?php echo $session['user']['name']; ?></strong> |
-						<small><?php echo $session['user']['username']; ?></small>
+						<strong><?php echo htmlspecialchars($session['user']['name']); ?></strong> |
+						<small><?php echo htmlspecialchars($session['user']['username']); ?></small>
 						</p>
 					</li>
 					<li>
