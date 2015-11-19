@@ -55,6 +55,14 @@ class C_Message extends AbstractController {
 
 		$this->display('header', $this->auxView, 'one_message', 'footer');
 	}
+
+	public function __construct(){
+		parent::__construct();
+		if (!isset($this->session['user'])) {
+			header("Location:".LINK_GLOBAL);
+			return;
+		}
+	}
 }
 
 ?>
