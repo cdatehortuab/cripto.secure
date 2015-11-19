@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-define('PROJECT_NAME', 'cripto.insecure');
+define('PROJECT_NAME', 'cripto.secure');
 define('PATH_GLOBAL', $_SERVER['DOCUMENT_ROOT'].PROJECT_NAME.'/');
 define('LINK_GLOBAL', ((empty($_SERVER['HTTPS']))? 'http://' : 'https://').
 	$_SERVER['SERVER_NAME'].
@@ -12,9 +12,9 @@ define('VIEWS_PATH', PATH_GLOBAL.'views/');
 define('CLASSES_PATH', PATH_GLOBAL.'classes/');
 
 define('MYSQL_HOST', 'sql5.freemysqlhosting.net');
-define('MYSQL_USER', 'sql596310');
-define('MYSQL_PASS', 'eN2*iL7%');
-define('MYSQL_DBNAME', 'sql596310');
+define('MYSQL_USER', 'sql596927');
+define('MYSQL_PASS', 'pS3!bD3*');
+define('MYSQL_DBNAME', 'sql596927');
 define('MYSQL_PORT', 3306);
 
 function autoload($class_name) {

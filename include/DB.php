@@ -1,5 +1,7 @@
 <?php
 
+require (PATH_GLOBAL.'include/phpass/PasswordHash.php');
+
 class DB {
 	private static $instance = NULL;
 
@@ -19,8 +21,28 @@ class DB {
 		return $data;
 	}
 
-	private function throw_sql_exception($class)
-    {
+	private function do_operation($operation, $class = NULL) {
+		$result = mysqli_query($this->cn, $operation) ;
+		if(!$result) {$this->throw_sql_exception($class);}	
+	}
+
+	private function escape_string(&$data) {
+		if(is_object($data)) {
+			foreach ($data->jsonSerialize() as $key => $attribute) {
+				if (!empty($data->$key)) {
+					$data->$key = mysqli_real_escape_string($this->cn, $data->$key);
+				}
+			}
+		} else if(is_array($data)) {
+			foreach ($data as $key => $value) {
+				$this->escape_string($data[$key]);
+			}
+		} else {
+			$data = mysqli_real_escape_string($this->cn, $data);
+		}
+	}
+
+	private function throw_sql_exception($class) {
 		$errno = mysqli_errno($this->cn);
 		$error = mysqli_error($this->cn);		
 		/*if ($errno == 1452) { //No se satisface la clave foránea
@@ -33,14 +55,9 @@ class DB {
         throw new Exception($msg);
     }
 
-	private function do_operation($operation, $class = NULL) {
-		$result = mysqli_query($this->cn, $operation) ;
-		if(!$result) {$this->throw_sql_exception($class);}	
-	}
-
 	public function select($class, $case, $data = NULL) {
 		$query = NULL;
-		
+		$this->escape_string($data);
 		switch ($class) {
 			
 			case "User":
@@ -58,7 +75,13 @@ class DB {
 				case "login":
 					$username = $data['username'];
 					$password = $data['password'];
-					$query = "SELECT * FROM user WHERE username = '$username' AND password = '$password'";
+					$query = "SELECT * FROM user WHERE username = '$username'";
+					$result = $this->get_data($query);
+					$hasher = new PasswordHash(8, FALSE);
+					if (empty($result) || !($hasher->CheckPassword($password, $result[0]->password))) {
+						$query = "SELECT *  FROM user WHERE 1 != 1";
+					}
+					unset($hasher);
 					break;
 				
 				case 'with_message':
@@ -86,7 +109,6 @@ class DB {
 					break;
 				
 				default:
-					# code...
 					break;
 			}
 			break;
@@ -97,7 +119,7 @@ class DB {
 	public function insert($case, $object) {
 		$query = NULL;
 		$class = get_class($object);
-		
+		$this->escape_string($object);
 		switch ($class) {
 			
 			case "User":
@@ -110,6 +132,9 @@ class DB {
 					$email = $object->email;
 					$image = $object->image;
 					$birthday = $object->birthday;
+					$hasher = new PasswordHash(8, FALSE);
+					$password = $hasher->HashPassword($password);
+					unset($hasher);
 					if ($image == NULL)
 						$query = "INSERT INTO user (name, username, password, email, birthday) VALUES ('$name', '$username', '$password', '$email', '$birthday');";
 					else
@@ -142,7 +167,7 @@ class DB {
 	public function delete($case, $object) {
 		$query = NULL;
 		$class = get_class($object);
-		
+		$this->escape_string($object);
 		switch ($class) {
 			
 			case "User":
@@ -163,7 +188,7 @@ class DB {
 	public function update($case, $object) {
 		$query = NULL;
 		$class = get_class($object);
-		
+		$this->escape_string($object);
 		switch ($class) {
 			
 			case "User":
